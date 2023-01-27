@@ -1,0 +1,2 @@
+aiogram==2.24
+Django==4.1.5
