@@ -29,9 +29,8 @@ class User(Model):
     first_name = CharField(max_length=150, null=True, blank=True)
     last_name = CharField(max_length=150, null=True, blank=True)
     telegram_id = CharField(max_length=20, unique=True)
-    can_send_messages = BooleanField(default=False)
     date_joined = DateTimeField(auto_now_add=True)
-    group = ForeignKey('apps.Group', CASCADE)
+    group_id = CharField(max_length=100, null=True, blank=True)
 
     class Meta:
         db_table = 'users'
@@ -44,9 +43,13 @@ class InvatedMember(Model):
     telegram = CharField(max_length=50)
     chat = CharField(max_length=50)
     invated_users_count = PositiveIntegerField(default=0)
+    can_send_message = BooleanField(default=False)
 
     class Meta:
         db_table = 'invited_members'
+        verbose_name = "Odam Qo'shganlar"
+        verbose_name_plural = "Odam Qo'shganlar"
+        ordering = ['-invated_users_count']
 
 
 class Settings(Model):

@@ -45,7 +45,7 @@ class Database:
 
     def get_all_chats(self, **kwargs):
         sql = "SELECT * FROM groups"
-        result = self.execute(sql, parameters=parameters, fetchone=True)
+        result = self.execute(sql, fetchall=True)
         return result
 
     def new_chat(self, chat_id, username=None, title=None):
@@ -63,15 +63,19 @@ class Database:
             return 20
         return 20 if limit[0] <= 0 else limit[0]
 
-    def add_user(self, first_name: str, last_name: str, telegram_id: int, group_id):
-        sql = """INSERT INTO users(first_name, last_name, telegram_id, can_send_messages, date_joined, group_id)
-         values(?, ?, ?, FALSE, CURRENT_TIMESTAMP, (select id from groups where chat_id=?))"""
+    def add_user(self, first_name: str, last_name: str, telegram_id: int, group_id=None):
+        sql = """INSERT INTO users(first_name, last_name, telegram_id, date_joined, group_id)
+         values(?, ?, ?, CURRENT_TIMESTAMP, ?)"""
         self.execute(sql, parameters=(first_name, last_name, telegram_id, group_id), commit=True)
 
     @property
     def select_all_users(self):
-        sql = 'SELECT * FROM users'
+        sql = 'SELECT telegram_id FROM users'
         return self.execute(sql, fetchall=True)
+
+    def select_all_chat_users(self, chat_id):
+        sql = 'SELECT telegram_id FROM users where group_id = ?'
+        return self.execute(sql, parameters=(chat_id,), fetchall=True)
 
     def select_user(self, **kwargs):
         sql = "SELECT * FROM users WHERE "
@@ -84,20 +88,25 @@ class Database:
 
     def count_invitation(self, group_id, user_id):
         try:
-            sql = 'select invated_users_count from invited_members where chat = ? and telegram = ?;'
+            sql = 'select invated_users_count, can_send_message from invited_members where chat = ? and telegram = ?;'
             result = self.execute(sql, parameters=(group_id, user_id), fetchone=True)
             if not result:
-                sql = 'insert into invited_members(invated_users_count, chat, telegram) values (0, ?, ?)'
+                sql = 'insert into invited_members(invated_users_count, chat, telegram, can_send_message) ' \
+                      'values (0, ?, ?, FALSE)'
                 self.execute(sql, parameters=(group_id, user_id), commit=True)
-                return 0
+                return 0, False
         except IntegrityError:
-            return 0
-        return result[0]
+            return 0, False
+        return result
 
     def increase_invitation(self, group_id, user_id):
         sql = 'update invited_members set invated_users_count = ?  where chat = ? and telegram = ?;'
-        count = self.count_invitation(group_id, user_id) + 1
+        count = self.count_invitation(group_id, user_id)[0] + 1
         return self.execute(sql, parameters=(count, group_id, user_id), commit=True)
+
+    def can_send_message(self, group_id, user_id):
+        sql = 'update invited_members set can_send_message = TRUE where chat = ? and telegram = ?'
+        return self.execute(sql, parameters=(group_id, user_id), commit=True)
 
     def delete_users(self):
         self.execute('delete from users where true;', commit=True)
