@@ -60,8 +60,8 @@ class Database:
         sql = "select invite_user_limit from settings join groups g on g.id = settings.group_id where chat_id = ?;"
         limit = self.execute(sql, parameters=(group_id,), fetchone=True)
         if not limit:
-            return 20
-        return 20 if limit[0] <= 0 else limit[0]
+            return 5
+        return 5 if limit[0] <= 0 else limit[0]
 
     def add_user(self, first_name: str, last_name: str, telegram_id: int, group_id=None):
         sql = """INSERT INTO users(first_name, last_name, telegram_id, date_joined, group_id)
@@ -99,9 +99,9 @@ class Database:
             return 0, False
         return result
 
-    def increase_invitation(self, group_id, user_id):
+    def increase_invitation(self, group_id, user_id, count):
         sql = 'update invited_members set invated_users_count = ?  where chat = ? and telegram = ?;'
-        count = self.count_invitation(group_id, user_id)[0] + 1
+        count = self.count_invitation(group_id, user_id)[0] + count
         return self.execute(sql, parameters=(count, group_id, user_id), commit=True)
 
     def can_send_message(self, group_id, user_id):

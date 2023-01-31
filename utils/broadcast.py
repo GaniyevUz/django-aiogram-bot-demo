@@ -52,7 +52,7 @@ async def broadcaster(users: list, from_user_id: int, message_id: int) -> int:
             print()
             if await copy_message(user_id[0], from_user_id, message_id):
                 count += 1
-            # await asyncio.sleep(.05)  # 20 messages per second (Limit: 30 messages per second)
+            await asyncio.sleep(.05)  # 20 messages per second (Limit: 30 messages per second)
 
     finally:
         log.info(f"{count} messages successful sent.")

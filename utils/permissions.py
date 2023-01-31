@@ -13,3 +13,4 @@ FREE = ChatPermissions(can_send_messages=True,
                        can_invite_users=True,
                        can_send_polls=True,
                        )
+

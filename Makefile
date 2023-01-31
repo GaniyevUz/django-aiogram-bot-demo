@@ -6,4 +6,4 @@ admin:
 	./manage.py createsuperuser --username admin --email admin@example.com
 
 unmig:
-	find . -path "*/migrations/*.py" -not -name "__init__.py" -delete
+	find . -path "*/migrations/*.py" -not -name "__init__.py" -deletesudo apt
