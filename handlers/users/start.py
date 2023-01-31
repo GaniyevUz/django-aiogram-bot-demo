@@ -1,10 +1,11 @@
 from aiogram import types
 from aiogram.dispatcher.filters.builtin import CommandStart
+from aiogram.types import ChatType
 
 from loader import dp, db
 
 
-@dp.message_handler(CommandStart(), )
+@dp.message_handler(CommandStart(), chat_type=[ChatType.PRIVATE])
 async def bot_start(message: types.Message):
     user = message.from_user
     chat = message.get_args() if message.get_args() else None
